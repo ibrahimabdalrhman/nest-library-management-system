@@ -21,11 +21,11 @@ export class UserController {
     return this.userService.findAll();
   }
 
-  @Get(':id')
+  @Get(':username')
   @ApiOperation({ summary: 'Get details of a user by ID' })
-  @ApiParam({ name: 'id', description: 'ID of the user' })
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
+  @ApiParam({ name: 'username', description: 'username of the user' })
+  findOne(@Param('username') username: string) {
+    return this.userService.findOne(username);
   }
 
   @Patch(':id')

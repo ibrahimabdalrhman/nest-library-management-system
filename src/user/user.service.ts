@@ -24,8 +24,8 @@ export class UserService {
     return this.userModel.find().exec();
   }
 
-  async findOne(id: string): Promise<CreateUserDto | undefined> {
-    return this.userModel.findById(id).exec();
+  async findOne(username: string): Promise<CreateUserDto | undefined> {
+    return this.userModel.findOne({username}).exec();
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {
