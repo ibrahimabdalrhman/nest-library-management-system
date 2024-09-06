@@ -6,6 +6,7 @@ import { BookSchema } from './entities/book.entity';
 import { AuthorModule } from 'src/author/author.module';
 import { AuthorSchema } from 'src/author/entities/author.entity';
 import { CategoryModule } from 'src/category/category.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import { CategoryModule } from 'src/category/category.module';
       { name: 'Book', schema: BookSchema }
     ]),
     AuthorModule,
-    CategoryModule
+    CategoryModule,
+    AuthModule
   ],
   controllers: [BookController],
   providers: [BookService],

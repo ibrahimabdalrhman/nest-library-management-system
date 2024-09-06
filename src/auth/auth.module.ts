@@ -4,9 +4,11 @@ import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtStrategy } from './jwt.strategy'; 
+import { JwtStrategy } from './jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './local.strategy';
+import { RolesGuard } from './roles.guard';
+import { APP_GUARD } from '@nestjs/core';  // Import APP_GUARD
 
 @Module({
   imports: [
@@ -17,12 +19,20 @@ import { LocalStrategy } from './local.strategy';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
-        signOptions: { expiresIn: '1h' },
+        signOptions: { expiresIn: configService.get('JWT_EXPIRED') },
       }),
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService,JwtStrategy,LocalStrategy],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    LocalStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,  // Correctly providing the RolesGuard as APP_GUARD
+    },
+  ],
   controllers: [AuthController],
   exports: [AuthService],
 })
