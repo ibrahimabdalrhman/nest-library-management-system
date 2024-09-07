@@ -45,4 +45,16 @@ export class CategoryService {
   async remove(id: string): Promise<any> {
     return this.categoryModel.findByIdAndDelete(id).exec();
   }
+
+  async uploadImage(
+    image: string,
+    categoryId: string,
+  ): Promise<CreateCategoryDto> {
+    const category = await this.categoryModel.findById(categoryId);
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+    category.image = image;
+    return category.save();
+  }
 }
