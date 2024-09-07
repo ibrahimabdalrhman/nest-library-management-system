@@ -1,12 +1,8 @@
-import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';
-import { SignupAuthDto } from './dto/signup-auth.dto';
+import { UserService } from '../user/user.service'; // Adjust the path according to your project structure
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -15,33 +11,25 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async validateUser(username: string, password: string): Promise<any> {
-    const user = await this.userService.findOne(username);
-    if (user && (await bcrypt.compare(password, user.password))) {
-      const { password, ...result } = user;
-      return result;
+  async validateUser(loginDto: LoginDto): Promise<any> {
+    const user = await this.userService.findOne(loginDto.username);
+
+    if (user && bcrypt.compareSync(loginDto.password, user.password)) {
+      return user;
     }
     return null;
   }
 
-  async login(user: any) {
+  async login(user) {
     const payload = {
       username: user.username,
-      sub: user.id,
+      sub: user._id.toString(),
       roles: user.roles,
     };
+    console.log(payload);
+
     return {
       access_token: this.jwtService.sign(payload),
     };
-  }
-
-  async signup(signupdto: SignupAuthDto) {
-    const existingUser = await this.userService.findOne(signupdto.username);
-    if (existingUser) {
-      throw new ConflictException('Username already exists');
-    }
-    const hashedPassword = await bcrypt.hash(signupdto.password, 10);
-    const newUser = await this.userService.create(signupdto);
-    return newUser;
   }
 }

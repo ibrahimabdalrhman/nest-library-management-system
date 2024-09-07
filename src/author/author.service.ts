@@ -5,7 +5,9 @@ import { CreateAuthorDto } from './dto/create-author.dto';
 
 @Injectable()
 export class AuthorService {
-  constructor(@InjectModel('Author') private readonly authorModel: Model<CreateAuthorDto>) {}
+  constructor(
+    @InjectModel('Author') private readonly authorModel: Model<CreateAuthorDto>,
+  ) {}
 
   async create(createAuthorDto: any): Promise<CreateAuthorDto> {
     const newAuthor = new this.authorModel(createAuthorDto);
@@ -21,7 +23,9 @@ export class AuthorService {
   }
 
   async update(id: string, updateAuthorDto: any): Promise<CreateAuthorDto> {
-    return this.authorModel.findByIdAndUpdate(id, updateAuthorDto, { new: true }).exec();
+    return this.authorModel
+      .findByIdAndUpdate(id, updateAuthorDto, { new: true })
+      .exec();
   }
 
   async remove(id: string): Promise<any> {

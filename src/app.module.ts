@@ -7,12 +7,9 @@ import { CategoryModule } from './category/category.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
-import { JwtAuthGuard } from './auth/jwt-auth.guard';
-import { RolesGuard } from './auth/roles.guard';
-
 @Module({
   imports: [
-    ConfigModule.forRoot(), // Load environment variables from .env file
+    ConfigModule.forRoot(),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -26,11 +23,6 @@ import { RolesGuard } from './auth/roles.guard';
     UserModule,
     AuthModule,
   ],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard,
-    },
-  ],
+ 
 })
 export class AppModule {}

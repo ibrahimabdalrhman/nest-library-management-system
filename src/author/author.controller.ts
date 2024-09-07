@@ -11,13 +11,23 @@ import {
 import { AuthorService } from './author.service';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { UpdateAuthorDto } from './dto/update-author.dto';
-import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
+import { AuthGuard } from 'src/auth/jwt/auth.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { RolesEnum } from 'src/user/enum/roles';
+import { Roles } from 'src/auth/roles.decorator';
+@ApiBearerAuth('access_token')
 @ApiTags('authors')
 @Controller('author')
 export class AuthorController {
   constructor(private readonly authorService: AuthorService) {}
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(RolesEnum.ADMIN)
   @Post()
   @ApiOperation({ summary: 'create new author ' })
   create(@Body() createAuthorDto: CreateAuthorDto) {
@@ -36,14 +46,16 @@ export class AuthorController {
   findOne(@Param('id') id: string) {
     return this.authorService.findOne(id);
   }
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(RolesEnum.ADMIN)
   @Patch(':id')
   @ApiOperation({ summary: 'update author by ID' })
   @ApiParam({ name: 'id', description: 'ID of the author' })
   update(@Param('id') id: string, @Body() updateAuthorDto: UpdateAuthorDto) {
     return this.authorService.update(id, updateAuthorDto);
   }
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(RolesEnum.ADMIN)
   @Delete(':id')
   @ApiOperation({ summary: 'delete author by ID' })
   @ApiParam({ name: 'id', description: 'ID of the author' })

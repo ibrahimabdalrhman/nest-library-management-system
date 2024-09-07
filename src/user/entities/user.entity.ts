@@ -9,6 +9,6 @@ export const  UserSchema=new Schema({
     roles: {
         type: [String],
         enum: Object.values(RolesEnum),
-        default: ['user'] 
+        default:RolesEnum.USER 
       },
 });

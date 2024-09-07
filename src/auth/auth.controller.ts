@@ -1,24 +1,35 @@
-import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UnauthorizedException,
+  UseGuards,
+  Get,
+  Request,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginAuthDto } from './dto/login-auth.dto';
-import { ApiTags } from '@nestjs/swagger';
-import { SignupAuthDto } from './dto/signup-auth.dto';
-
-@ApiTags('Auth')
+import { LoginDto } from './dto/login.dto'; // Create this DTO
+import { AuthGuard } from './jwt/auth.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
+@ApiBearerAuth('access_token')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(@Body() loginDto:any) {    
-    const user = await this.authService.validateUser(loginDto.username, loginDto.password);
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+  async login(@Body() loginDto: LoginDto) {
+    console.log(process.env.SECRET_KEY);
+
+    const user = await this.authService.validateUser(loginDto);
+    if (user) {
+      return await this.authService.login(user);
     }
-    return this.authService.login(user);
+    throw new UnauthorizedException('Invalid credentials');
   }
-  @Post('signup')
-  async signup(@Body() signupDto: SignupAuthDto) {
-    return this.authService.signup(signupDto);
+
+  @UseGuards(AuthGuard)
+  @Get('profile')
+  getProfile(@Request() req) {
+    return req.user;
   }
 }

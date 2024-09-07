@@ -10,12 +10,10 @@ import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: 'Book', schema: BookSchema }
-    ]),
+    MongooseModule.forFeature([{ name: 'Book', schema: BookSchema }]),
     AuthorModule,
     CategoryModule,
-    AuthModule
+    AuthModule,
   ],
   controllers: [BookController],
   providers: [BookService],

@@ -24,7 +24,7 @@ export class UserService {
     return this.userModel.find().exec();
   }
 
-  async findOne(username: string): Promise<CreateUserDto | undefined> {
+  async findOne(username: string): Promise<CreateUserDto | undefined> {  
     return this.userModel.findOne({username}).exec();
   }
 

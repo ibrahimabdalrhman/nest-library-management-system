@@ -1,39 +1,26 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtStrategy } from './jwt.strategy';
-import { PassportModule } from '@nestjs/passport';
-import { LocalStrategy } from './local.strategy';
-import { RolesGuard } from './roles.guard';
-import { APP_GUARD } from '@nestjs/core';  // Import APP_GUARD
 
 @Module({
   imports: [
-    ConfigModule, // Import ConfigModule here
-    UserModule,
-    PassportModule,
+    ConfigModule.forRoot(), // Ensure environment variables are loaded
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET'),
-        signOptions: { expiresIn: configService.get('JWT_EXPIRED') },
-      }),
       inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('SECRET_KEY'),
+        signOptions: { expiresIn: '60d' },
+      }),
     }),
+    UserModule,
   ],
-  providers: [
-    AuthService,
-    JwtStrategy,
-    LocalStrategy,
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard,  // Correctly providing the RolesGuard as APP_GUARD
-    },
-  ],
+  providers: [AuthService],
   controllers: [AuthController],
-  exports: [AuthService],
+  exports: [AuthService, JwtModule], // Export JwtModule if other modules need it
+
 })
 export class AuthModule {}
