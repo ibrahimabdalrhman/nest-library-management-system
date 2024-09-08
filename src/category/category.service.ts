@@ -49,12 +49,8 @@ export class CategoryService {
   async uploadImage(
     image: string,
     categoryId: string,
-  ): Promise<CreateCategoryDto> {
-    const category = await this.categoryModel.findById(categoryId);
-    if (!category) {
-      throw new NotFoundException('Category not found');
-    }
-    category.image = image;
-    return category.save();
+  ): Promise<any> {
+    const updatedCategory = await this.categoryModel.findByIdAndUpdate(categoryId, {image}, { new: true });
+    return updatedCategory;
   }
 }

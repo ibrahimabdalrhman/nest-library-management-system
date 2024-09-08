@@ -31,13 +31,28 @@ import { RolesEnum } from 'src/user/enum/roles';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { Multer } from 'multer'; // Import the Multer types
-import { join } from 'path';
+import { extname, join } from 'path';
+import { CloudinaryConfigService } from 'src/cloudinary/cloudinary.config';
+
+
+
+export const storage = diskStorage({
+  destination: '../../uploads/category-images', // Destination folder
+  filename: (req, file, callback) => {
+    // Generate a unique filename
+    const uniqueName = `${Date.now()}${extname(file.originalname)}`;
+    callback(null, uniqueName);
+  },
+});
 
 @ApiBearerAuth('access_token')
 @ApiTags('categories')
 @Controller('category')
 export class CategoryController {
-  constructor(private readonly categoryService: CategoryService) {}
+  constructor(
+    private readonly categoryService: CategoryService,
+    private readonly cloudinaryService: CloudinaryConfigService,
+  ) {}
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(RolesEnum.ADMIN)
   @Post()
@@ -87,38 +102,18 @@ export class CategoryController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(RolesEnum.ADMIN)
   @Post(':id/image')
-  @ApiOperation({ summary: 'Upload an image for category' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        image: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
-  })
-  @UseInterceptors(
-    FileInterceptor('image', {
-      storage: diskStorage({
-        destination: './uploads/category-images',
-        filename: (req, file, cb) => {
-          // Use original filename or create a custom name
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, uniqueSuffix + '-' + file.originalname);
-        },
-      }),
-    }),
-  )
-  @ApiOperation({ summary: 'update image of category by ID' })
-  @ApiParam({ name: 'id', description: 'ID of the category' })
+  @UseInterceptors(FileInterceptor('image',{storage}))
   async uploadCategoryImage(
     @UploadedFile() file: Express.Multer.File,
     @Param('id') id: string,
   ) {
-    return this.categoryService.uploadImage(file.path, id);
+    console.log(id);
+    
+    console.log(file.path);
+    
+    const result = await this.cloudinaryService.uploadImage(file.path);
+    return this.categoryService.uploadImage(result.secure_url, id);
   }
 }
+
+
