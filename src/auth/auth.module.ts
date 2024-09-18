@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
@@ -16,7 +16,7 @@ import { UserModule } from 'src/user/user.module';
         signOptions: { expiresIn: '60d' },
       }),
     }),
-    UserModule,
+    forwardRef(() => UserModule),
   ],
   providers: [AuthService],
   controllers: [AuthController],

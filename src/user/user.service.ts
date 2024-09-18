@@ -1,14 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel('User') private readonly userModel: Model<CreateUserDto>,
+    @Inject(forwardRef(() => AuthService))
+    private readonly authService: AuthService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -24,12 +33,42 @@ export class UserService {
     return this.userModel.find().exec();
   }
 
-  async findOne(username: string): Promise<CreateUserDto | undefined> {  
-    return this.userModel.findOne({username}).exec();
+  async findOne(username: string, req?): Promise<CreateUserDto | undefined> {
+    const user = await this.userModel.findOne({ username }).exec();
+    if(!user){
+      throw new NotFoundException(`User with ID ${username} not found.`)
+    }
+    if (req) {
+      if (await this.authService.thisIsMe(req.user, user)) {
+        console.log('true');
+      } else {
+        console.log('false');
+      }
+      console.log('Admin: ', await this.authService.thisIsAdmin(req.user));
+    }
+
+    return user;
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto, req) {
+    const user = await this.userModel.findById(id);
+    if(!user){
+      throw new NotFoundException(`User with ID ${id} not found.`)
+    }
+    if (
+      await this.authService.thisIsMe(req.user, user) ||
+      await this.authService.thisIsAdmin(req.user)
+    ) {
+
+      const user = await this.userModel.findByIdAndUpdate(id, updateUserDto, {
+        new: true,
+      });
+      return user;
+    } else {
+      throw new UnauthorizedException(
+        'You are not authorized to update this user.',
+      );
+    }
   }
 
   remove(id: string) {

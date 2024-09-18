@@ -1,9 +1,30 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiOperation, ApiParam, ApiProperty, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiProperty,
+  ApiTags,
+} from '@nestjs/swagger';
+import { AuthGuard } from 'src/auth/jwt/auth.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
+import { RolesEnum } from './enum/roles';
 
+@ApiBearerAuth('access_token')
 @ApiTags('Users')
 @Controller('user')
 export class UserController {
@@ -20,17 +41,24 @@ export class UserController {
   findAll() {
     return this.userService.findAll();
   }
-
+  @UseGuards(AuthGuard)
   @Get(':username')
   @ApiOperation({ summary: 'Get details of a user by ID' })
   @ApiParam({ name: 'username', description: 'username of the user' })
-  findOne(@Param('username') username: string) {
-    return this.userService.findOne(username);
-  }
+  findOne(@Param('username') username: string, @Request() req) {
+    console.log(req.user);
 
+    return this.userService.findOne(username, req);
+  }
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @Request() req,
+  ) {
+    return this.userService.update(id, updateUserDto, req);
   }
 
   @Delete(':id')

@@ -11,11 +11,16 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto'; // Create this DTO
 import { AuthGuard } from './jwt/auth.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { SignupDto } from './dto/signup.dto';
 @ApiBearerAuth('access_token')
-@ApiTags("auth")
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+  @Post('signup')
+  async signup(@Body() signupDto: SignupDto) {
+    return this.authService.signup(signupDto);
+  }
 
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
@@ -33,6 +38,4 @@ export class AuthController {
   getProfile(@Request() req) {
     return req.user;
   }
-
-  
 }
