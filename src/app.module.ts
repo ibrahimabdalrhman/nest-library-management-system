@@ -9,11 +9,9 @@ import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { BorrowingModule } from './borrowing/borrowing.module';
 @Module({
   imports: [
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
-    }),
     ConfigModule.forRoot(),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
@@ -27,6 +25,7 @@ import { join } from 'path';
     CategoryModule,
     UserModule,
     AuthModule,
+    BorrowingModule,
   ],
  
 })

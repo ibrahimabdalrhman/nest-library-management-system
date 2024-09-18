@@ -53,14 +53,11 @@ export class AuthService {
 
   async thisIsMe(currentUser: CurrentUser, user): Promise<Boolean> {
     if (currentUser.sub === user._id.toString()) {
-      console.log('true');
-
       return true;
     }
-    console.log('false');
-
     return false;
   }
+  
   async thisIsAdmin(currentUser: CurrentUser): Promise<boolean> {
     return currentUser.roles.some((role) => role === RolesEnum.ADMIN);
   }

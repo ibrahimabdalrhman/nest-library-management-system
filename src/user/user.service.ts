@@ -35,31 +35,28 @@ export class UserService {
 
   async findOne(username: string, req?): Promise<CreateUserDto | undefined> {
     const user = await this.userModel.findOne({ username }).exec();
-    if(!user){
-      throw new NotFoundException(`User with ID ${username} not found.`)
+    if (!user) {
+      throw new NotFoundException(`User with ID ${username} not found.`);
     }
-    if (req) {
-      if (await this.authService.thisIsMe(req.user, user)) {
-        console.log('true');
-      } else {
-        console.log('false');
-      }
-      console.log('Admin: ', await this.authService.thisIsAdmin(req.user));
+    return user;
+  }
+  async findById(id: string): Promise<CreateUserDto | undefined> {
+    const user = await this.userModel.findById(id).exec();
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found.`);
     }
-
     return user;
   }
 
   async update(id: string, updateUserDto: UpdateUserDto, req) {
     const user = await this.userModel.findById(id);
-    if(!user){
-      throw new NotFoundException(`User with ID ${id} not found.`)
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found.`);
     }
     if (
-      await this.authService.thisIsMe(req.user, user) ||
-      await this.authService.thisIsAdmin(req.user)
+      (await this.authService.thisIsMe(req.user, user)) ||
+      (await this.authService.thisIsAdmin(req.user))
     ) {
-
       const user = await this.userModel.findByIdAndUpdate(id, updateUserDto, {
         new: true,
       });
