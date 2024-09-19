@@ -26,7 +26,7 @@ export class CreateBookDto {
   @ApiProperty({ description: 'ISBN number of the book', required: false })
   @IsString()
   @IsOptional()
-  readonly isbn?: string;
+   isbn?: string;
 
   @ApiProperty({ description: 'Number of available copies in the library' })
   @IsNumber()

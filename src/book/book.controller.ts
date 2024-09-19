@@ -9,11 +9,12 @@ import {
   UseGuards,
   Req,
   Request,
+  Query,
 } from '@nestjs/common';
 import { BookService } from './book.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/jwt/auth.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
@@ -24,16 +25,23 @@ import { RolesEnum } from 'src/user/enum/roles';
 @Controller('book')
 export class BookController {
   constructor(private readonly bookService: BookService) {}
-
+  
+  @Get('search')
+  @ApiQuery({ name: 'title', required: false, description: 'Search by book title' })
+  @ApiQuery({ name: 'author', required: false, description: 'Search by author ID' })
+  @ApiQuery({ name: 'category', required: false, description: 'Search by category ID' })
+  @ApiQuery({ name: 'isbn', required: false, description: 'Search by ISBN' })  async searchBooks(@Query() query: any) {
+    return this.bookService.searchBooks(query);
+  }
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(RolesEnum.ADMIN)
   @Post()
   create(@Body() createBookDto: CreateBookDto) {
     return this.bookService.create(createBookDto);
   }
-
+  
   @Get()
-  findAll(@Request() req) {
+  findAll() {
     return this.bookService.findAll();
   }
 
@@ -56,4 +64,6 @@ export class BookController {
   remove(@Param('id') id: string) {
     return this.bookService.remove(id);
   }
+
+  
 }

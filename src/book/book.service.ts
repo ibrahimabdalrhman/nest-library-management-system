@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import { AuthorService } from 'src/author/author.service';
 import { CategoryService } from 'src/category/category.service';
 
@@ -68,5 +68,31 @@ export class BookService {
 
   async remove(id: string): Promise<any> {
     return this.bookModel.findByIdAndDelete(id).exec();
+  }
+
+  async searchBooks(query: any): Promise<any> {
+    const filter: FilterQuery<any> = {};
+
+    // Search by title
+    if (query.title) {
+      filter.title = { $regex: query.title, $options: 'i' }; // case-insensitive
+    }
+
+    // Search by author (populating the author details)
+    if (query.author) {
+      filter.author_id = query.author;
+    }
+
+    // Search by category
+    if (query.category) {
+      filter.category_id = query.category;
+    }
+
+    // Search by ISBN
+    if (query.isbn) {
+      filter.isbn = query.isbn;
+    }
+
+    return this.bookModel.find(filter).populate('author_id category_id').exec();
   }
 }
